@@ -98,6 +98,8 @@ if (navigator.geolocation) {
         }
 
     })
+
+    
 } else {
     console.error("Geolocation is not supported by this browser!");
 }
