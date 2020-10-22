@@ -1,9 +1,9 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Http\Requests\SpaceRequest;
 use Illuminate\Http\Request;
-
+use App\Models\Space;
 class SpaceController extends Controller
 {
     public function __construct(){
@@ -16,7 +16,8 @@ class SpaceController extends Controller
      */
     public function index()
     {
-        return view('pages.space.index');
+        $spaces = Space::orderBy('created_at', 'DESC')->paginate(4);
+        return view('pages.space.index', compact('spaces'));
     }
 
     /**
@@ -35,15 +36,8 @@ class SpaceController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(SpaceRequest $request)
     {
-        $this->validate($request, [
-            'title' => ['required', 'min:3'],
-            'address' => ['required', 'min:5'],
-            'description' => ['required', 'min:10'],
-            'latitude' => ['required'],
-            'longitude' => ['required'],
-        ]);
 
         $request->user()->spaces()->create($request->all());
 
