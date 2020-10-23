@@ -2,27 +2,25 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\User;
-use App\Models\SpacePhoto;
+
 class Space extends Model
 {
-    use HasFactory;
-
     protected $guarded = [];
 
-    public function photos(){
+    public function photos()
+    {
         return $this->hasMany(SpacePhoto::class, 'space_id', 'id');
     }
 
-    public function user(){
+    public function user()
+    {
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
     public function getSpaces($latitude, $longitude, $radius)
     {
-        return $this->select('*')
+        return $this->select('spaces.*')
             ->selectRaw(
                 '( 6371 *
                     acos( cos( radians(?) ) *
