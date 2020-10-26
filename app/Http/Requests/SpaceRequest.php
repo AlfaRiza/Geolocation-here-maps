@@ -29,6 +29,8 @@ class SpaceRequest extends FormRequest
             'description' => 'required|min:10',
             'latitude' => 'required',
             'longitude' => 'required',
+            'photo' => 'required',
+            'photo.*' => 'mimes:jpg,jpeg,png'
         ];
     }
 
@@ -42,7 +44,9 @@ class SpaceRequest extends FormRequest
             'description.required' => 'Deskripsi harus diisi',
             'description.min' => 'Deskripsi minimal 10 karakter',
             'latitude.required' => 'Latitude harus diisi',
-            'longitude.required' => 'Longitude harus diisi'
+            'longitude.required' => 'Longitude harus diisi',
+            'photo.required' => 'Photo harus diisi',
+            'photo.*.mimes' => 'Photo harus berupa jpg,jpeg atau png'
         ];
     }
 }

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\SpaceRequest;
 use Illuminate\Http\Request;
 use App\Models\Space;
+use App\Models\User;
+use Illuminate\Support\Facades\Storage;
 class SpaceController extends Controller
 {
     public function __construct(){
@@ -18,6 +20,13 @@ class SpaceController extends Controller
     {
         $spaces = Space::orderBy('created_at', 'DESC')->paginate(4);
         return view('pages.space.index', compact('spaces'));
+    }
+
+    /**
+     * Browse codespace
+     */
+    public function browse(){
+        return view('pages.space.browse');
     }
 
     /**
@@ -39,7 +48,19 @@ class SpaceController extends Controller
     public function store(SpaceRequest $request)
     {
 
-        $request->user()->spaces()->create($request->all());
+        $space = $request->user()->spaces()->create($request->except('photo'));
+
+        $spacePhotos = [];
+
+        foreach ($request->file('photo') as $file) {
+            $path = Storage::disk('public')->putFile('spaces', $file);
+            $spacePhotos[] = [
+                'space_id' => $space->id,
+                'path' => $path
+            ];
+        }
+
+        $space->photos()->insert($spacePhotos);
 
         return redirect()->route('space.index')->with('status', 'Spaces Created!');
     }
@@ -50,9 +71,11 @@ class SpaceController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        //
+        $space = Space::findOrFail($id);
+
+        return view('pages.space.show', compact('space'));
     }
 
     /**
@@ -63,7 +86,11 @@ class SpaceController extends Controller
      */
     public function edit($id)
     {
-        //
+        $space = Space::findOrFail($id);
+        if ($space->user_id != request()->user()->id) {
+            return redirect()->back();
+        }
+        return view('pages.space.edit', compact('space'));
     }
 
     /**
@@ -73,19 +100,35 @@ class SpaceController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(SpaceRequest $request, $id)
     {
-        //
+        $space = Space::findOrFail($id);
+        if ($space->user_id != request()->user()->id) {
+            return redirect()->back();
+        }
+
+        $space->update($request->all());
+        return redirect()->route('space.index')->with('status', 'updated!');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified resource from storag
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
     {
-        //
+        $space = Space::findOrFail($id);
+        if ($space->user_id != request()->user()->id) {
+            return redirect()->back();
+        }
+        
+        foreach ($space->photos as $photo) {
+            Storage::delete('public/'.$photo->path);
+        }
+        
+        $space->delete();
+        return redirect()->route('space.index')->with('status', 'Space deleted!');
     }
 }

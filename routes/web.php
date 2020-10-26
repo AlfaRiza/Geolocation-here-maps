@@ -22,3 +22,5 @@ Auth::routes();
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 Route::resource('/space', SpaceController::class);
+
+Route::get('/browse/space', [ SpaceController::class, 'browse'])->name('space.browse');
